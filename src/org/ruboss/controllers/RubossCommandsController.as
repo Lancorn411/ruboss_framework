@@ -38,9 +38,6 @@ package org.ruboss.controllers {
      */
     public function RubossCommandsController(models:Array, 
       extraServices:Array = null, targetServiceId:int = -1) {
-      for each (var cmd:Class in commands) {
-        addCommand(cmd);
-      }
       
       if (extraServices == null) extraServices = new Array;
       
