@@ -36,7 +36,7 @@ package org.ruboss.controllers {
      *  by default. All other providers (e.g. AIR) must be registered here)
      * @param targetServiceId default service to use for operations (by default HTTPServiceProvider.ID)
      */
-    public function RubossCommandsController(commands:Array, models:Array, 
+    public function RubossCommandsController(models:Array, 
       extraServices:Array = null, targetServiceId:int = -1) {
       for each (var cmd:Class in commands) {
         addCommand(cmd);
@@ -55,9 +55,8 @@ package org.ruboss.controllers {
      * @param cmd command class
      * @param useWeakReference will be registered for events using a weak reference
      */
-    public function addCommand(cmd:Class, useWeakReference:Boolean = true):void {
-      var commandName:String = getCommandName(cmd);
-      commands[commandName] = cmd;  
+    public function addCommand(cmdName:String, cmd:Class, useWeakReference:Boolean = true):void {
+	  commands[cmdName] = cmd;  
       RubossCommandsEventDispatcher.getInstance().addEventListener(commandName, executeCommand, 
         false, 0, useWeakReference);
     }
@@ -69,8 +68,7 @@ package org.ruboss.controllers {
      *  
      * @see addCommand
      */
-    public function removeCommand(cmd:Class):void {
-      var cmdName:String = getCommandName(cmd);
+    public function removeCommand(cmdName:String):void {
       RubossCommandsEventDispatcher.getInstance().removeEventListener(cmdName, executeCommand);
       delete commands[cmdName]; 
     }
@@ -82,10 +80,9 @@ package org.ruboss.controllers {
      * @param data arbitrary data to pass to the command
      * @param targetServiceId indicates which service the command should use (if any)
      */
-    public function execute(cmd:Class, data:Object = null, targetServiceId:int = -1):void {
-      var cmdName:String = getCommandName(cmd);
+    public function execute(cmdName:String, cmd:Class, data:Object = null, targetServiceId:int = -1):void {
       if (!commands[cmdName]) {
-        addCommand(cmd);
+        addCommand(cmdName, cmd);
       }
       
       var event:RubossEvent = new RubossEvent(cmdName);
@@ -97,10 +94,6 @@ package org.ruboss.controllers {
     private function executeCommand(event:RubossEvent):void {
       var cmd:ICommand = new commands[event.type];
       cmd.execute(event);
-    }
-
-    private static function getCommandName(cmd:Class):String {
-      return getQualifiedClassName(cmd);
     }
   }
 }
